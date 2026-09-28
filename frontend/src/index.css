@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* No external font imports — this dashboard must run fully offline per the
+   project's core requirement. System font stacks only (see tailwind.config.js). */
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #0a0e14;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(34, 211, 238, 0.05), transparent 40%),
+    radial-gradient(circle at 85% 100%, rgba(244, 63, 94, 0.04), transparent 40%);
+  background-attachment: fixed;
+}
+
+.font-mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1c2433; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #2a3550; }
+
+/* Case View PDF/print export: hide chrome, keep only the case report */
+@media print {
+  body { background: white !important; }
+  .no-print { display: none !important; }
+  .print-case {
+    background: white !important;
+    color: black !important;
+  }
+  .print-case * {
+    color: black !important;
+    background: white !important;
+    border-color: #ccc !important;
+  }
+}

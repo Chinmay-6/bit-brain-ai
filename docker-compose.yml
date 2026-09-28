@@ -1,0 +1,52 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      args:
+        - DATABASE_PATH=${DATABASE_PATH:-/app/bitbrain.db}
+        - GRAPH_PATH=${GRAPH_PATH:-/app/pipeline/graph.gpickle}
+        - MODEL_DIR=${MODEL_DIR:-/app/pipeline/models}
+        - FEATURES_PATH=${FEATURES_PATH:-/app/pipeline/features.csv}
+        - RAW_DATA_DIR=${RAW_DATA_DIR:-/app/data/raw}
+        - METRICS_PATH=${METRICS_PATH:-/app/docs/model_metrics.json}
+        - SYNTH_SEED=${SYNTH_SEED:-42}
+        - SYNTH_N_LICIT_ENTITIES=${SYNTH_N_LICIT_ENTITIES:-120}
+        - SYNTH_N_ILLICIT_ENTITIES=${SYNTH_N_ILLICIT_ENTITIES:-25}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      - DATABASE_PATH=${DATABASE_PATH:-/app/bitbrain.db}
+      - GRAPH_PATH=${GRAPH_PATH:-/app/pipeline/graph.gpickle}
+      - MODEL_DIR=${MODEL_DIR:-/app/pipeline/models}
+      - FEATURES_PATH=${FEATURES_PATH:-/app/pipeline/features.csv}
+      - RAW_DATA_DIR=${RAW_DATA_DIR:-/app/data/raw}
+      - METRICS_PATH=${METRICS_PATH:-/app/docs/model_metrics.json}
+      - BACKEND_HOST=${BACKEND_HOST:-0.0.0.0}
+      - BACKEND_PORT=${BACKEND_PORT:-8000}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - RISK_WEIGHT_SUPERVISED=${RISK_WEIGHT_SUPERVISED:-0.65}
+      - RISK_WEIGHT_ANOMALY=${RISK_WEIGHT_ANOMALY:-0.35}
+      - RISK_TIER_HIGH=${RISK_TIER_HIGH:-70}
+      - RISK_TIER_MEDIUM=${RISK_TIER_MEDIUM:-40}
+      - SYNTH_SEED=${SYNTH_SEED:-42}
+      - SYNTH_N_LICIT_ENTITIES=${SYNTH_N_LICIT_ENTITIES:-120}
+      - SYNTH_N_ILLICIT_ENTITIES=${SYNTH_N_ILLICIT_ENTITIES:-25}
+      - GRAPH_MAX_SUBGRAPH_NODES=${GRAPH_MAX_SUBGRAPH_NODES:-300}
+      - ALERTS_DEFAULT_LIMIT=${ALERTS_DEFAULT_LIMIT:-50}
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-/api}
+        - VITE_RISK_TIER_HIGH=${RISK_TIER_HIGH:-70}
+        - VITE_RISK_TIER_MEDIUM=${RISK_TIER_MEDIUM:-40}
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
