@@ -6,10 +6,10 @@ import re
 import xml.etree.ElementTree as ET
 
 
-TXID_KEYS = {"txid", "transactionid", "hash", "id"}
+TXID_KEYS = {"txid", "transactionid", "transactionhash", "hash", "id"}
 TIME_KEYS = {"timestamp", "time", "date", "datetime", "blocktime", "firstseen"}
-INPUT_KEYS = {"inputs", "input", "inputaddresses", "inputaddress", "from", "fromaddress", "sender", "source", "sourceaddress", "vin", "vins"}
-OUTPUT_KEYS = {"outputs", "output", "outputaddresses", "outputaddress", "to", "toaddress", "recipient", "recipients", "destination", "target", "vout", "vouts"}
+INPUT_KEYS = {"inputs", "input", "inputaddresses", "inputaddress", "from", "fromaddress", "fromaccount", "fromwallet", "sender", "senderid", "senderaddress", "source", "sourceid", "sourceaddress", "src", "origin", "originaddress", "vin", "vins"}
+OUTPUT_KEYS = {"outputs", "output", "outputaddresses", "outputaddress", "to", "toaddress", "toaccount", "towallet", "recipient", "recipients", "recipientaddress", "receiver", "receiverid", "receiveraddress", "destination", "destinationaddress", "target", "targetid", "targetaddress", "dst", "dest", "vout", "vouts"}
 ADDRESS_KEYS = {"address", "addressid", "addr", "scriptpubkeyaddress"}
 AMOUNT_KEYS = {"amounts", "amount", "value", "values"}
 FEE_KEYS = {"fee", "transactionfee"}
@@ -203,7 +203,15 @@ def normalize_dataset(filename, raw):
         })
 
     if not transactions:
-        raise ValueError("No transaction records with recognizable input or output addresses were found")
+        columns = sorted({str(key) for record in records if isinstance(record, dict) for key in record})
+        column_list = ", ".join(columns[:20]) or "none detected"
+        if len(columns) > 20:
+            column_list += ", ..."
+        raise ValueError(
+            "No transaction records with recognizable sender/input or receiver/output addresses were found. "
+            f"Columns detected: {column_list}. Expected fields such as from/to, sender/receiver, "
+            "source/destination, input_addresses/output_addresses, or vin/vout."
+        )
 
     entities, address_entities = _cluster_addresses(transactions)
     first_seen = {}
